@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ABC Tuition Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ---------------- COMMON ---------------- */
+* {margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif;}
+body {height:100vh; width:100%; overflow:hidden;}
+
+/* ---------------- LOGIN ---------------- */
+#loginPage {
+  background: linear-gradient(180deg, #00b0ff 0%, #66e8ff 100%);
+  display:flex; justify-content:center; align-items:center; height:100%;
+  width:100%;
+}
+.login-container {
+  background: rgba(255,255,255,0.95);
+  padding: 40px 30px;
+  border-radius: 20px;
+  box-shadow:0 8px 25px rgba(0,0,0,0.2);
+  width:350px;
+  text-align:center;
+}
+/* Hide both pages initially */
+#loginPage, #mainPage {display: none;}
+
+.login-container h2 {color:#004a75; margin-bottom:25px; font-size:1.5rem;}
+.login-container input {
+  width:100%; padding:12px 15px; margin:12px 0;
+  border-radius:25px; border:1px solid #007ecc; outline:none; font-size:15px;
+}
+.login-container input:focus {border-color:#005fa3; box-shadow:0 0 5px rgba(0,127,255,0.4);}
+.login-container button {
+  width:100%; padding:12px; margin-top:15px;
+  border:none; border-radius:25px; background:#007ecc; color:#fff;
+  font-size:16px; cursor:pointer; transition:0.3s;
+}
+.login-container button:hover {background:#005fa3;}
+.error-msg {color:#ff4d4d; font-size:14px; margin-top:10px; display:none;}
+
+/* ---------------- MAIN PAGE ---------------- */
+#mainPage {
+  display:none;
+  height:100%; width:100%;
+  background: linear-gradient(180deg, #00b0ff 0%, #66e8ff 100%);
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+  color:#000; overflow-y:auto;
+}
+.navbar {
+  width:100%;
+  background:linear-gradient(90deg, #00b0ff 0%, #00d5ff 100%);
+  color:white; display:flex; justify-content:space-between; align-items:center;
+  padding:10px 18px; box-shadow:0 4px 10px rgba(0,0,0,0.15); flex-shrink:0;
+}
+.nav-left {display:flex; align-items:center; gap:10px;}
+.nav-left h3 {font-size:16px; font-weight:600;}
+.menu-icon {font-size:24px; cursor:pointer; user-select:none;}
+.profile-pic {width:36px; height:36px; border-radius:50%; border:2px solid #fff; object-fit:cover;}
+.side-menu {
+  position:fixed; top:0; left:-250px; width:250px; height:100%;
+  background:white; box-shadow:5px 0 15px rgba(0,0,0,0.15);
+  display:flex; flex-direction:column; padding:30px 20px; transition:0.3s ease-in-out; z-index:100;
+}
+.side-menu a {text-decoration:none; color:#00aaff; font-size:18px; margin-bottom:18px; font-weight:500;}
+.close-btn {align-self:flex-end; font-size:28px; cursor:pointer; color:#00aaff; margin-bottom:20px;}
+.app-container {width:100%; max-width:430px; flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:space-evenly; padding:10px 15px;}
+.logo-card {background:#fff; border-radius:20px; padding:12px; text-align:center; box-shadow:0px 6px 12px rgba(0,0,0,0.12); width:90%;}
+.logo-card img {width:140px;}
+.logo-card h2 {font-size:16px; margin-top:5px; color:#002a5b;}
+.logo-card p {color:#555; font-weight:500; font-size:13px;}
+.grid {display:grid; grid-template-columns:repeat(2,1fr); gap:10px; width:90%;}
+.card {background:#fff; color:#000; border-radius:14px; text-align:center; padding:12px 8px; font-weight:500; font-size:14px; box-shadow:0px 5px 10px rgba(0,0,0,0.1);}
+.assignments {background:linear-gradient(90deg,#ffeef2,#e7f8ff); border-radius:14px; padding:10px; width:90%; text-align:center; box-shadow:0 5px 10px rgba(0,0,0,0.08);}
+.assignments h3 {font-weight:600; font-size:14px;}
+.assignments p {font-size:12px; color:#555;}
+.history {width:90%; text-align:center;}
+.history h3 {font-size:15px; font-weight:600; margin-bottom:5px;}
+.test {background:#fff; border-radius:14px; padding:10px 12px; margin-bottom:8px; box-shadow:0 4px 10px rgba(0,0,0,0.08); display:flex; justify-content:space-between; align-items:center;}
+.test h4 {font-size:13px; font-weight:500;}
+.test p {font-size:12px; color:#777;}
+.analysis {background:linear-gradient(90deg,#008cff,#00d1ff); color:#fff; border:none; border-radius:20px; padding:4px 10px; font-size:12px; cursor:pointer;}
+.score {color:#777; font-weight:500; font-size:12px;}
+@media (max-width:768px){.logo-card img{width:120px}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage">
+  <div class="login-container">
+    <h2>Student Login</h2>
+    <input type="text" id="username" placeholder="Username" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button onclick="login()">Login</button>
+    <div class="error-msg" id="errorMsg">Invalid username or password</div>
+  </div>
+</div>
+
+<!-- MAIN PAGE -->
+<div id="mainPage">
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <div class="menu-icon" id="menu-btn">☰</div>
+      <h3 id="studentName">Hi, Student</h3>
+    </div>
+    <img src="https://i.imgur.com/0y0y0y0.png" alt="Profile" class="profile-pic" />
+  </nav>
+
+  <!-- Slide Menu -->
+  <div class="side-menu" id="side-menu">
+    <div class="close-btn" id="close-btn">&times;</div>
+    <a href="#">About Us</a>
+    <a href="#">Contact Us</a>
+  </div>
+
+  <!-- App Container -->
+  <div class="app-container">
+    <div class="logo-card">
+      <img src="logo.png" alt="ABC Tuition Academy" />
+      <h2>ABC TUITION ACADEMY</h2>
+      <p>Learn • Practice • Grow</p>
+    </div>
+
+    <div class="grid">
+      <a href="online_test.html" style="text-decoration: none;"><div class="card">Online Tests 💎</div></a>
+      <div class="card">Study Material 💎</div>
+      <div class="card">📋 Ranking</div>
+      <div class="card">🏆 E-Books 💎</div>
+    </div>
+
+    <div class="assignments">
+      <h3>Assignments Pending</h3>
+      <p>No assignments found</p>
+    </div>
+
+    <div class="history">
+      <h3>Test History</h3>
+      <div class="test">
+        <div>
+          <h4>Poppins/Inter</h4>
+          <p>Testart</p>
+        </div>
+        <button class="analysis">Analysis</button>
+      </div>
+      <div class="test">
+        <div>
+          <h4>Poppins/Inter</h4>
+          <p>Rster</p>
+        </div>
+        <div class="score">Score</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function login() {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+  const errorMsg = document.getElementById("errorMsg");
+
+  const response = await fetch("http://127.0.0.1:5000/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+
+  const result = await response.json();
+
+  if (response.status === 200) {
+    localStorage.setItem("loggedInUser", username);
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("mainPage").style.display = "flex";
+    document.getElementById("studentName").textContent = "Hi, " + username;
+    errorMsg.style.display = "none";
+  } else if (response.status === 201) {
+    localStorage.setItem("loggedInUser", username);
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("mainPage").style.display = "flex";
+    document.getElementById("studentName").textContent = `Welcome, ${username}! Your account has been created.`;
+    errorMsg.style.display = "none";
+  } else {
+    errorMsg.style.display = "block";
+    errorMsg.textContent = result.message;
+  }
+};
+
+window.onload = function () {
+  const loggedUser = localStorage.getItem("loggedInUser");
+  if (loggedUser) {
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("mainPage").style.display = "flex";
+    document.getElementById("studentName").textContent = "Hi, " + loggedUser;
+  } else {
+    document.getElementById("loginPage").style.display = "flex";
+  }
+};
+
+// Side menu toggle
+const menuBtn = document.getElementById("menu-btn");
+const sideMenu = document.getElementById("side-menu");
+const closeBtn = document.getElementById("close-btn");
+menuBtn.onclick = () => (sideMenu.style.left = "0");
+closeBtn.onclick = () => (sideMenu.style.left = "-250px");
+</script>
+
+</body>
+</html>
