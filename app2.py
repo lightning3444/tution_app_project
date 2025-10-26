@@ -25,7 +25,12 @@ init_db()
 def login():
     data = request.get_json()
     username = data['username']
-    password = data['password'].encode('utf-8')
+    password = data['password']
+
+    # WARNING: Logging password; NEVER do this in production
+    print(f"Login attempt with username: {username} and password: {password}")
+
+    password_bytes = password.encode('utf-8')
 
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
@@ -37,14 +42,14 @@ def login():
         if isinstance(stored_hash, str):
             stored_hash = stored_hash.encode('utf-8')
 
-        if bcrypt.checkpw(password, stored_hash):
+        if bcrypt.checkpw(password_bytes, stored_hash):
             conn.close()
             return jsonify({"message": f"Welcome back, {username}!"}), 200
         else:
             conn.close()
             return jsonify({"message": "Invalid password!"}), 401
     else:
-        hashed = bcrypt.hashpw(password, bcrypt.gensalt())
+        hashed = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
         try:
             cursor.execute("INSERT INTO users (username, password_hash) VALUES (?, ?)", (username, hashed))
             conn.commit()
@@ -53,15 +58,6 @@ def login():
         except sqlite3.IntegrityError:
             conn.close()
             return jsonify({"message": "Failed to register user!"}), 400
-
-@app.route('/debug/users', methods=['GET'])
-def debug_users():
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT username, password_hash FROM users")
-    users = cursor.fetchall()
-    conn.close()
-    return jsonify(users)  # Returns list of tuples (username, hashed password)
 
 if __name__ == "__main__":
     app.run(debug=True)
