@@ -28,6 +28,9 @@ def home():
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
+    if not data or 'username' not in data or 'password' not in data:
+        return jsonify({"message": "Username and password required"}), 400
+
     username = data['username']
     password = data['password'].encode('utf-8')
 
@@ -46,8 +49,8 @@ def login():
             conn.close()
             return jsonify({"message": "Invalid password!"}), 401
     else:
-        hashed = bcrypt.hashpw(password, bcrypt.gensalt())
         try:
+            hashed = bcrypt.hashpw(password, bcrypt.gensalt())
             cursor.execute("INSERT INTO users (username, password_hash) VALUES (?, ?)", (username, hashed))
             conn.commit()
             conn.close()
