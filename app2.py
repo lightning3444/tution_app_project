@@ -10,54 +10,61 @@ def init_db():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
     cursor.execute('''
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        password_hash TEXT NOT NULL
-    )
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL
+        )
     ''')
     conn.commit()
     conn.close()
 
 init_db()
 
-@app.route('/')
-def home():
-    return 'Flask app is running!'
-
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    if not data or 'username' not in data or 'password' not in data:
+    print(f"Received login request: {data}")  # Debug log for incoming request data
+
+    username = data.get('username')
+    password = data.get('password')
+
+    if not username or not password:
+        print("Missing username or password")  # Debug log for input validation failure
         return jsonify({"message": "Username and password required"}), 400
 
-    username = data['username']
-    password = data['password'].encode('utf-8')
+    password = password.encode('utf-8')
 
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
     cursor.execute("SELECT password_hash FROM users WHERE username=?", (username,))
     row = cursor.fetchone()
+
     if row:
         stored_hash = row[0]
         if isinstance(stored_hash, str):
             stored_hash = stored_hash.encode('utf-8')
+
         if bcrypt.checkpw(password, stored_hash):
+            print(f"User {username} logged in successfully")  # Debug log for success
             conn.close()
             return jsonify({"message": f"Welcome back, {username}!"}), 200
         else:
+            print(f"Invalid password attempt for user {username}")  # Debug log for failure
             conn.close()
             return jsonify({"message": "Invalid password!"}), 401
     else:
+        hashed = bcrypt.hashpw(password, bcrypt.gensalt())
         try:
-            hashed = bcrypt.hashpw(password, bcrypt.gensalt())
             cursor.execute("INSERT INTO users (username, password_hash) VALUES (?, ?)", (username, hashed))
             conn.commit()
+            print(f"New user {username} registered.")  # Debug log for registration success
             conn.close()
-            return jsonify({"message": f"User {username} registered successfully."}), 201
+            return jsonify({"message": f"New user {username} registered successfully!"}), 201
         except sqlite3.IntegrityError:
+            print(f"Failed to register user: {username} (already exists)")  # Debug log for failure
             conn.close()
-            return jsonify({"message": "Username already exists!"}), 409
+            return jsonify({"message": "Failed to register user!"}), 400
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+if __name__ == "__main__":
+    app.run(debug=True)
