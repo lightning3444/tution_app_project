@@ -24,16 +24,8 @@ init_db()
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    print(f"Received login request: {data}")  # Debug log for incoming request data
-
-    username = data.get('username')
-    password = data.get('password')
-
-    if not username or not password:
-        print("Missing username or password")  # Debug log for input validation failure
-        return jsonify({"message": "Username and password required"}), 400
-
-    password = password.encode('utf-8')
+    username = data['username']
+    password = data['password'].encode('utf-8')
 
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
@@ -46,11 +38,9 @@ def login():
             stored_hash = stored_hash.encode('utf-8')
 
         if bcrypt.checkpw(password, stored_hash):
-            print(f"User {username} logged in successfully")  # Debug log for success
             conn.close()
             return jsonify({"message": f"Welcome back, {username}!"}), 200
         else:
-            print(f"Invalid password attempt for user {username}")  # Debug log for failure
             conn.close()
             return jsonify({"message": "Invalid password!"}), 401
     else:
@@ -58,13 +48,20 @@ def login():
         try:
             cursor.execute("INSERT INTO users (username, password_hash) VALUES (?, ?)", (username, hashed))
             conn.commit()
-            print(f"New user {username} registered.")  # Debug log for registration success
             conn.close()
             return jsonify({"message": f"New user {username} registered successfully!"}), 201
         except sqlite3.IntegrityError:
-            print(f"Failed to register user: {username} (already exists)")  # Debug log for failure
             conn.close()
             return jsonify({"message": "Failed to register user!"}), 400
+
+@app.route('/debug/users', methods=['GET'])
+def debug_users():
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT username, password_hash FROM users")
+    users = cursor.fetchall()
+    conn.close()
+    return jsonify(users)  # Returns list of tuples (username, hashed password)
 
 if __name__ == "__main__":
     app.run(debug=True)
